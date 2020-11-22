@@ -72,8 +72,20 @@ void print_price(int print_array[], int price[])
 	printf("}\n");
 }
 
+//6. 주어진 무게조건 속에서 최대의 가치를 뽑을 수 있는 값(price)들을 모아둠
+void print_price2(int print_array[], int price[])
+{
+	printf("지금 실행중인 Price 집합 = { ");
+	for (int i = 0; i < 5; i++)
+	{
+		if (print_array[i] != 0)
+			printf("%d ", price[i]);
+	}
+	printf("}\n");
+}
 
-//[Main1] : DFS 방식 KnapSack 알고리즘 (단, Bound방식으로 제작하였음.)
+
+//[Main1] : DFS 방식 KnapSack 알고리즘 (단, Bound방식으로 제작하였음.) -> 단원이 Bound를 설명하고있기 때문
 //(인덱스는 0부터 시작)
 void knapSack_DFS(int weight[], int price[], int pw[], int set_bool[], int size, int index, int mp[], int print_array[])
 {
@@ -83,6 +95,7 @@ void knapSack_DFS(int weight[], int price[], int pw[], int set_bool[], int size,
 		//print_price(print_array, price);
 		if (weight[index] <= size)
 		{
+			print_price2(set_bool, price); //출력함수.
 			int bound = promising_function(index + 1, size - weight[index], weight, price, pw);
 			if (mp[0] < sum_set_price(set_bool, price) + price[index] + bound)
 			{
@@ -102,6 +115,7 @@ void knapSack_DFS(int weight[], int price[], int pw[], int set_bool[], int size,
 		bound = promising_function(index + 1, size, weight, price, pw);
 		if (mp[0] < sum_set_price(set_bool, price) + bound)
 		{
+			print_price2(set_bool, price); //출력함수
 			//뽑지 않음을 의미함 
 			knapSack_DFS(weight, price, pw, set_bool, size, index + 1, mp, print_array);
 		}
@@ -151,7 +165,7 @@ void enqueue(int queue[], int front_end[], int value)
 		queue[front_end[1]] = value;
 	}
 }
- 
+
 //5. Dequeue 기능 (Deque한 기능을 return해줌)
 int dequeue(int queue[], int front_end[])
 {
@@ -166,6 +180,17 @@ int dequeue(int queue[], int front_end[])
 	}
 }
 
+//번외 함수 (과정 출력) : 큐
+void print_queue(int queue[])
+{
+	printf("Queue Set = { ");
+	for (int i = 0; i < 100; i++)
+	{
+		if (queue[i] != 0 && queue[i] != -1)
+			printf("%d ", queue[i]);
+	}
+	printf("}\n");
+}
 
 
 
@@ -274,6 +299,7 @@ int knapSack_BFS(int price[], int weight[], int pw[], int maxprofit[], int print
 	front_end[1] = -1;
 
 	set_array_queue(queue);
+	int current_binary_array[5] = { 0, };
 	int left_binary_array[5] = { 0, };
 	int right_binary_array[5] = { 0, };
 	int sum_weight_price_left[2] = { 0, };
@@ -283,9 +309,13 @@ int knapSack_BFS(int price[], int weight[], int pw[], int maxprofit[], int print
 
 	enqueue(queue, front_end, root);
 
+	//과정 출력
+	print_price2(current_binary_array, price);
+
 	//empty == false 일 때 까지 
 	while (isEmpty(queue, front_end) == 0)
 	{
+		print_queue(queue);
 		int index = dequeue(queue, front_end);
 		int left = index * 2;
 		int right = index * 2 + 1;
@@ -293,6 +323,10 @@ int knapSack_BFS(int price[], int weight[], int pw[], int maxprofit[], int print
 		int index_right = binary_convert(right, right_binary_array);
 		cal_sum(sum_weight_price_left, left_binary_array, weight, price);
 		cal_sum(sum_weight_price_right, right_binary_array, weight, price);
+
+		//과정 출력
+		//binary_convert(index, current_binary_array);
+		//print_price2(current_binary_array, price);
 
 		//일단은 왼쪽 자식부터 설정
 		if (sum_weight_price_left[0] <= MAX_WEIGHT && sum_weight_price_left[1] > maxprofit[0])
@@ -378,9 +412,9 @@ void heap_setting(int heap[])
 
 int make_heap(int heap[], int queue_bound[], int queue[], int front_end[])
 {
-//조건들
-// (a) 힙의 최대값을 pop함
-// (b) pop을 하는경우 queue의 마지막 인덱스와 swap하고 pop
+	//조건들
+	// (a) 힙의 최대값을 pop함
+	// (b) pop을 하는경우 queue의 마지막 인덱스와 swap하고 pop
 	heap_setting(heap);
 	int heap_index[100] = { 0, };
 	heap_index_setting(heap_index);
@@ -445,6 +479,7 @@ int knapSack_BestFirst(int price[], int weight[], int pw[], int maxprofit[], int
 	front_end[1] = -1;
 
 	set_array_queue(queue);
+	int current_binary_array[5] = { 0, };
 	int left_binary_array[5] = { 0, };
 	int right_binary_array[5] = { 0, };
 	int sum_weight_price_left[2] = { 0, };
@@ -453,10 +488,14 @@ int knapSack_BestFirst(int price[], int weight[], int pw[], int maxprofit[], int
 	//차례대로 weight와 price를 계산 값을 담는 함수. 
 
 	enqueue_bf(queue, queue_bound, front_end, root, 0);
+	//과정 출력
+	print_price2(current_binary_array, price);
 
 	//empty == false 일 때 까지 
 	while (isEmpty(queue, front_end) == 0)
 	{
+		print_queue(queue);
+
 		/*앞의 BFS와 동일한 내용*/
 		int index = dequeue_bf(queue, queue_bound, front_end);
 		int left = index * 2;
@@ -465,6 +504,10 @@ int knapSack_BestFirst(int price[], int weight[], int pw[], int maxprofit[], int
 		int index_right = binary_convert(right, right_binary_array);
 		cal_sum(sum_weight_price_left, left_binary_array, weight, price);
 		cal_sum(sum_weight_price_right, right_binary_array, weight, price);
+
+		//과정 출력
+		//binary_convert(index, current_binary_array);
+		//print_price2(current_binary_array , price);
 
 		//일단은 왼쪽 자식부터 설정
 		if (sum_weight_price_left[0] <= MAX_WEIGHT && sum_weight_price_left[1] > maxprofit[0])
@@ -498,7 +541,9 @@ void execute1(int weight[], int price[], int pw[])
 	int set_bool[5] = { 0, };
 	int mp[1] = { 0 };
 	int print_array[5] = { 0, };
+	printf("\n--------------------프로그램 과정 중 : 시작--------------------------\n");
 	knapSack_DFS(weight, price, pw, set_bool, MAX_WEIGHT, 0, mp, print_array);
+	printf("--------------------프로그램 과정 중 : 끝--------------------------\n");
 	print_price(print_array, price);
 	printf("MaxProfit of Depth First Search(DFS) = %d\n", mp[0]);
 	printf(" +++++++++ 1. Depth First Search KnapSack : END +++++++++\n");
@@ -510,7 +555,9 @@ void execute2(int weight[], int price[], int pw[])
 	printf("\n +++++++++ 2. Bredth First Search KnapSack : Start +++++++++\n");
 	int print_array2[5] = { 0, };
 	int maxprofit[1] = { 0, };
+	printf("\n--------------------프로그램 과정 중 : 시작--------------------------\n");
 	int value_BFS = knapSack_BFS(price, weight, pw, maxprofit, print_array2);
+	printf("--------------------프로그램 과정 중 : 끝--------------------------\n");
 	print_price(print_array2, price);
 	printf("MaxProfit of Bredth First Search (BFS) = %d\n", value_BFS);
 	printf(" +++++++++ 2. Bredth First Search KnapSack : END +++++++++\n");
@@ -522,7 +569,9 @@ void execute3(int weight[], int price[], int pw[])
 	printf("\n +++++++++ 3. Best First Search KnapSack : Start +++++++++\n");
 	int print_array3[5] = { 0, };
 	int maxprofit2[1] = { 0, };
+	printf("\n--------------------프로그램 과정 중 : 시작--------------------------\n");
 	int var3 = knapSack_BestFirst(price, weight, pw, maxprofit2, print_array3);
+	printf("--------------------프로그램 과정 중 : 끝--------------------------\n");
 	print_price(print_array3, price);
 	printf("MaxProfit of Best First Search = %d\n", var3);
 	printf(" +++++++++ 3. Best First Search KnapSack : END +++++++++\n");
@@ -537,8 +586,8 @@ int main(void)
 	int price[5] = { 20,30,35,12,3 };
 	int pw[5] = { 0, };
 	effective_price_array(price, weight, pw);
-	
-	printf("\nKnapSack을 실행하기 위한 무게 조건은 = %d 입니다.\n",MAX_WEIGHT);
+
+	printf("\nKnapSack을 실행하기 위한 무게 조건은 = %d 입니다.\n", MAX_WEIGHT);
 	execute1(weight, price, pw);
 	execute2(weight, price, pw);
 	execute3(weight, price, pw);
